@@ -1,5 +1,8 @@
+"use client";
+
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
+import { AuthButton } from "@/components/ui/auth-button";
 
 export default function Home() {
   return (
@@ -51,7 +54,10 @@ export default function Home() {
             Read our docs
           </a>
         </div>
-        <Button href="/dashboard">Go to Dashboard</Button>
+        <div className="flex gap-4">
+          <Button href="/dashboard">Go to Dashboard</Button>
+          <AuthButton />
+        </div>
       </main>
       <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
         <a
