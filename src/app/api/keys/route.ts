@@ -1,24 +1,54 @@
 import { NextResponse } from "next/server";
 import { v4 as uuidv4 } from "uuid";
-import { apiKeys, ApiKey } from "@/lib/store";
+import { supabase } from "@/lib/supabase";
+import type { ApiKey } from "@/lib/types";
 
 export async function GET() {
+  const { data: apiKeys, error } = await supabase
+    .from("api_keys")
+    .select("*")
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+
   return NextResponse.json(apiKeys);
 }
 
 export async function POST(request: Request) {
-  const { name } = await request.json();
+  const { name, rate_limit = 1000 } = await request.json();
 
-  const newKey: ApiKey = {
-    id: uuidv4(),
-    name,
+  if (!name || typeof name !== "string" || name.trim().length === 0) {
+    return NextResponse.json(
+      { error: "Name is required and must be a non-empty string" },
+      { status: 400 }
+    );
+  }
+
+  if (rate_limit && (typeof rate_limit !== "number" || rate_limit < 0)) {
+    return NextResponse.json(
+      { error: "Rate limit must be a positive number" },
+      { status: 400 }
+    );
+  }
+
+  const newKey: Omit<ApiKey, "id" | "created_at"> = {
+    name: name.trim(),
     key: `sk-${uuidv4()}`,
-    createdAt: new Date().toISOString(),
     usage: 0,
-    limit: 1000,
+    rate_limit,
   };
 
-  apiKeys.push(newKey);
+  const { data, error } = await supabase
+    .from("api_keys")
+    .insert([newKey])
+    .select()
+    .single();
 
-  return NextResponse.json(newKey);
+  if (error) {
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+
+  return NextResponse.json(data);
 }

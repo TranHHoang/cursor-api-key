@@ -7,6 +7,8 @@ import { UsageHeader } from "@/components/ui/usage-header";
 import { Modal } from "@/components/ui/modal";
 import { CreateApiKeyForm } from "@/components/ui/create-api-key-form";
 import { EditApiKeyForm } from "@/components/ui/edit-api-key-form";
+import { useToast } from "@/components/ui/toast";
+import { ToastContainer } from "@/components/ui/toast-container";
 
 interface ApiKeyResponse {
   id: string;
@@ -34,6 +36,7 @@ export default function DashboardPage() {
   const [isEditing, setIsEditing] = useState(false);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [editingKey, setEditingKey] = useState<ApiKey | null>(null);
+  const { toasts, addToast, removeToast } = useToast();
 
   useEffect(() => {
     fetchApiKeys();
@@ -56,6 +59,7 @@ export default function DashboardPage() {
     } catch (error) {
       setError("Failed to load API keys. Please try again later.");
       console.error("Error fetching API keys:", error);
+      addToast("Failed to load API keys", "error");
     } finally {
       setIsLoading(false);
     }
@@ -90,9 +94,11 @@ export default function DashboardPage() {
         { ...newKey, apiKey: newKey.key, usage: 0, limit },
       ]);
       setShowCreateModal(false);
+      addToast("API key created successfully", "success");
     } catch (error) {
       setError("Failed to create API key. Please try again.");
       console.error("Error creating API key:", error);
+      addToast("Failed to create API key", "error");
     } finally {
       setIsCreating(false);
     }
@@ -127,9 +133,11 @@ export default function DashboardPage() {
         apiKeys.map((key) => (key.id === id ? { ...key, name, limit } : key))
       );
       setEditingKey(null);
+      addToast("API key updated successfully", "success");
     } catch (error) {
       setError("Failed to update API key. Please try again.");
       console.error("Error updating API key:", error);
+      addToast("Failed to update API key", "error");
     } finally {
       setIsEditing(false);
     }
@@ -145,9 +153,11 @@ export default function DashboardPage() {
       if (!response.ok) throw new Error("Failed to delete API key");
 
       setApiKeys(apiKeys.filter((key) => key.id !== id));
+      addToast("API key deleted successfully", "success");
     } catch (error) {
       setError("Failed to delete API key. Please try again.");
       console.error("Error deleting API key:", error);
+      addToast("Failed to delete API key", "error");
     }
   };
 
@@ -253,6 +263,8 @@ export default function DashboardPage() {
           />
         )}
       </Modal>
+
+      <ToastContainer toasts={toasts} removeToast={removeToast} />
     </div>
   );
 }
