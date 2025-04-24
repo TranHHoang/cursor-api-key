@@ -35,8 +35,8 @@ export function Modal({ isOpen, onClose, children, title }: ModalProps) {
         onClick={onClose}
       />
       <div className="flex min-h-full items-center justify-center p-4">
-        <div className="relative bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full">
-          <div className="p-6">
+        <div className="relative w-full max-w-[90%] sm:max-w-md bg-white dark:bg-gray-800 rounded-lg shadow-xl">
+          <div className="p-4 sm:p-6">
             <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-4">
               {title}
             </h2>

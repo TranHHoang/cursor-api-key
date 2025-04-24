@@ -10,6 +10,8 @@ import { EditApiKeyForm } from "@/components/ui/edit-api-key-form";
 import { useToast } from "@/components/ui/toast";
 import { ToastContainer } from "@/components/ui/toast-container";
 import { Layout } from "@/components/layout";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
 
 interface ApiKeyResponse {
   id: string;
@@ -38,6 +40,15 @@ export default function DashboardPage() {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [editingKey, setEditingKey] = useState<ApiKey | null>(null);
   const { toasts, addToast, removeToast } = useToast();
+
+  const { status } = useSession();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (status === "unauthenticated") {
+      router.push("/auth/signin");
+    }
+  }, [status, router]);
 
   useEffect(() => {
     fetchApiKeys();
@@ -166,7 +177,7 @@ export default function DashboardPage() {
 
   return (
     <Layout>
-      <div className="container mx-auto px-4 py-8 max-w-5xl">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 max-w-7xl">
         <UsageHeader
           plan="Researcher"
           usedRequests={totalUsage}
@@ -174,21 +185,24 @@ export default function DashboardPage() {
         />
 
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow">
-          <div className="p-6 border-b border-gray-200 dark:border-gray-700">
-            <div className="flex justify-between items-center">
-              <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
-                API Keys
-              </h2>
+          <div className="p-4 sm:p-6 border-b border-gray-200 dark:border-gray-700">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+              <div>
+                <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
+                  API Keys
+                </h2>
+                <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
+                  The key is used to authenticate your requests to the Research
+                  API.
+                </p>
+              </div>
               <Button
                 onClick={() => setShowCreateModal(true)}
-                className="bg-purple-600 hover:bg-purple-700 text-white"
+                className="bg-purple-600 hover:bg-purple-700 text-white w-full sm:w-auto"
               >
                 + Create New Key
               </Button>
             </div>
-            <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
-              The key is used to authenticate your requests to the Research API.
-            </p>
           </div>
 
           {error && (
@@ -197,7 +211,7 @@ export default function DashboardPage() {
             </div>
           )}
 
-          <div className="p-6">
+          <div className="p-4 sm:p-6 overflow-x-auto">
             {isLoading ? (
               <div className="flex justify-center items-center h-32">
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600"></div>
@@ -212,14 +226,14 @@ export default function DashboardPage() {
                 </p>
               </div>
             ) : (
-              <>
-                <div className="flex text-sm font-medium text-gray-500 dark:text-gray-400 border-b border-gray-200 dark:border-gray-700 pb-2">
+              <div className="min-w-full">
+                <div className="hidden sm:flex text-sm font-medium text-gray-500 dark:text-gray-400 border-b border-gray-200 dark:border-gray-700 pb-2">
                   <div className="w-1/4">NAME</div>
                   <div className="w-24 text-center">USAGE</div>
                   <div className="flex-1">KEY</div>
                   <div className="w-32 text-right">OPTIONS</div>
                 </div>
-                <div>
+                <div className="space-y-4 sm:space-y-0">
                   {apiKeys.map((apiKey) => (
                     <ApiKeyItem
                       key={apiKey.id}
@@ -232,7 +246,7 @@ export default function DashboardPage() {
                     />
                   ))}
                 </div>
-              </>
+              </div>
             )}
           </div>
         </div>
